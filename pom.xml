@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ua.denis.jdbcproject</groupId>
-    <artifactId>JDBCProject</artifactId>
+    <groupId>ua.denys.carrentalservice</groupId>
+    <artifactId>Car-rental-service</artifactId>
     <version>0.1</version>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -30,13 +30,6 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-controls</artifactId>
-            <version>20-ea+2</version>
-        </dependency>
-
-
     </dependencies>
     <build>
         <plugins>
