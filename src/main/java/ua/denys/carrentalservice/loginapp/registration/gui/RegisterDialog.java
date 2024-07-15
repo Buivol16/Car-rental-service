@@ -5,62 +5,74 @@ import ua.denys.carrentalservice.loginapp.registration.service.RegistrationServi
 
 import javax.swing.*;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.showMessageDialog;
 import static ua.denys.carrentalservice.loginapp.common.LabelHandler.resetError;
 import static ua.denys.carrentalservice.loginapp.common.LabelHandler.setError;
+import static ua.denys.carrentalservice.loginapp.registration.utils.consts.RegisterMessageConst.SUCCESS_REGISTER_MESSAGE;
 import static ua.denys.carrentalservice.loginapp.utils.FieldValidation.isNotEmpty;
 
 public class RegisterDialog extends JDialog {
-  private JPanel contentPane;
-  private JTextField usernameField;
-  private JPasswordField passwordField;
-  private JButton registerMeButton;
-  private JButton cancelButton;
-  private JLabel usernameErrorLabel;
-  private JLabel passwordErrorLabel;
-  private JLabel errorLabel;
+    private JPanel contentPane;
+    private JTextField usernameField;
+    private JPasswordField passwordField;
+    private JButton registerMeButton;
+    private JButton cancelButton;
+    private JLabel usernameErrorLabel;
+    private JLabel passwordErrorLabel;
+    private JLabel errorLabel;
 
-  public RegisterDialog() {
-    setContentPane(contentPane);
-    setModal(true);
-    registerMeButton.addActionListener(
-        e -> {
-          resetError(usernameErrorLabel, passwordErrorLabel);
+    public RegisterDialog() {
+        setContentPane(contentPane);
+        setModal(true);
 
-          if (!isNotEmpty(usernameField)) {
-            setError(usernameErrorLabel, "Username field is empty.");
-          }
-          if (!isNotEmpty(passwordField)) {
-            setError(passwordErrorLabel, "Password field is empty.");
-          }
+        registerMeButton.addActionListener(
+                e -> {
+                    String username = usernameField.getText();
+                    String password = passwordField.getText();
 
-          if (!usernameField.getText().isBlank() && !passwordField.getText().isBlank()) {
-            register();
-          }
-        });
-    cancelButton.addActionListener(e -> dispose());
-  }
+                    resetError(usernameErrorLabel, passwordErrorLabel);
 
-  public void showDialog() {
-    RegisterDialog dialog = new RegisterDialog();
-    dialog.setSize(400, 400);
-    dialog.setVisible(true);
-  }
+                    checkFields();
 
-  private void register() {
-    try {
-      RegistrationService.getInstance().perform(usernameField.getText(), passwordField.getText());
-    } catch (OccupiedNameException exception) {
-      setError(errorLabel, exception.getMessage());
-      return;
-    } catch (SQLException exception) {
-      exception.printStackTrace();
-      setError(errorLabel, "Unexpected error");
-      return;
+                    if (!username.isBlank() && !password.isBlank()) register();
+                });
+
+        cancelButton.addActionListener(e -> dispose());
     }
-    showMessageDialog(null, "You are successfully registered!", "Success", INFORMATION_MESSAGE);
-    dispose();
-  }
+
+
+    public void showDialog() {
+        RegisterDialog dialog = new RegisterDialog();
+        dialog.setSize(400, 400);
+        dialog.setVisible(true);
+    }
+
+    private void register() {
+        var username = usernameField.getText();
+        var password = Arrays.toString(passwordField.getPassword());
+
+        try {
+            RegistrationService.getInstance().perform(username, password);
+            showMessageDialog(null, SUCCESS_REGISTER_MESSAGE, "Success", INFORMATION_MESSAGE);
+            dispose();
+        } catch (OccupiedNameException exception) {
+            var exceptionMessage = exception.getMessage();
+            setError(errorLabel, exceptionMessage);
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+            setError(errorLabel, "Unexpected error");
+        }
+    }
+
+    private void checkFields() {
+        if (!isNotEmpty(usernameField)) {
+            setError(usernameErrorLabel, "Username field is empty.");
+        }
+        if (!isNotEmpty(passwordField)) {
+            setError(passwordErrorLabel, "Password field is empty.");
+        }
+    }
 }
