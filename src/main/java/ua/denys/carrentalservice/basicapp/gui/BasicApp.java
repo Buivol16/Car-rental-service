@@ -1,15 +1,17 @@
 package ua.denys.carrentalservice.basicapp.gui;
 
-import ua.denys.carrentalservice.basicapp.model.Car;
-import ua.denys.carrentalservice.basicapp.services.CarService;
-import ua.denys.carrentalservice.loginapp.common.LabelHandler;
-
+import java.sql.SQLException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+
+import ua.denys.carrentalservice.basicapp.services.CarService;
+import ua.denys.carrentalservice.loginapp.common.LabelHandler;
+
+import static ua.denys.carrentalservice.basicapp.consts.BasicAppConst.BASIC_APP_HEIGHT;
+import static ua.denys.carrentalservice.basicapp.consts.BasicAppConst.BASIC_APP_TITLE;
+import static ua.denys.carrentalservice.basicapp.consts.BasicAppConst.BASIC_APP_WIDTH;
+import static ua.denys.carrentalservice.basicapp.consts.FileFormatConst.IMAGE_FILE_FORMATS;
 
 public class BasicApp extends JFrame {
   private int backPageIndex = 0;
@@ -46,12 +48,11 @@ public class BasicApp extends JFrame {
   private JButton backCarButton;
   private JFileChooser jFileChooser = new JFileChooser(FileSystemView.getFileSystemView());
   private FileNameExtensionFilter imageFilter =
-      new FileNameExtensionFilter(
-          "Image files", "tif, tiff, bmp, jpg, jpeg, png, raw, cr2, nef, orf, sr2");
+      new FileNameExtensionFilter("Image files", IMAGE_FILE_FORMATS);
 
   private BasicApp() {
-    setSize(1400, 1000);
-    setTitle("Car rent app");
+    setSize(BASIC_APP_WIDTH, BASIC_APP_HEIGHT);
+    setTitle(BASIC_APP_TITLE);
     setContentPane(mainPanel);
     newOfferButton.addActionListener(e -> toPage(1));
     myProfileButton.addActionListener(e -> toPage(2));
@@ -63,19 +64,30 @@ public class BasicApp extends JFrame {
     createCarButton.addActionListener(
         e -> {
           try {
-            CarService.getInstance()
-                .createNewCar(
-                    brandField.getText(),
-                    Integer.parseInt(seatsField.getText()),
-                    bodyList.getSelectedValue().toString(),
-                    Integer.parseInt(volumeField.getText()),
-                    fuelList.getSelectedValue().toString(),
-                    Integer.parseInt(baggageMassField.getText()),
-                    modelField.getText(),
-                    Integer.parseInt(powerField.getText()),
-                    transmissionList.getSelectedValue().toString());
+            CarService carServiceInstance = CarService.getInstance();
+
+            String brandField = this.brandField.getText();
+            String numberOfSeats = this.seatsField.getText();
+            String body = bodyList.getSelectedValue().toString();
+            String volume = volumeField.getText();
+            String fuelType = fuelList.getSelectedValue().toString();
+            String baggageMass = baggageMassField.getText();
+            String model = modelField.getText();
+            String power = powerField.getText();
+            String transmission = transmissionList.getSelectedValue().toString();
+
+            carServiceInstance.createNewCar(
+                brandField,
+                Integer.parseInt(numberOfSeats),
+                body,
+                Integer.parseInt(volume),
+                fuelType,
+                Integer.parseInt(baggageMass),
+                model,
+                Integer.parseInt(power),
+                transmission);
           } catch (SQLException exception) {
-            LabelHandler.setError(errorLabel, "Not all is blank");
+            LabelHandler.setError(errorLabel, "Some fields is blank");
             exception.printStackTrace();
           }
         });
@@ -110,11 +122,12 @@ public class BasicApp extends JFrame {
   }
 
   private void getCarsList() {
-    List<Car> cars = new ArrayList<>();
-    cars = CarService.getInstance().getByUserId();
-    DefaultListModel<String> dfl = new DefaultListModel<>();
-    for (Car car : cars) {
-      dfl.addElement(car.getCar());
+    var carServiceInstance = CarService.getInstance();
+    var cars = carServiceInstance.getByUserId();
+    var dfl = new DefaultListModel<>();
+    for (var car : cars) {
+      var selectedCar = car.getCar();
+      dfl.addElement(selectedCar);
     }
     carList.setModel(dfl);
   }

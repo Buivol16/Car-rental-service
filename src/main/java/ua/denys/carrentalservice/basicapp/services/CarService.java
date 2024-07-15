@@ -30,7 +30,7 @@ public class CarService {
       int massBaggageToPossible,
       String model,
       int power,
-      String tranmission)
+      String transmission)
       throws SQLException {
     DbHelper.getInstance()
         .addCar(
@@ -42,7 +42,7 @@ public class CarService {
             massBaggageToPossible,
             model,
             power,
-            tranmission);
+            transmission);
   }
 
   public List<Car> getByUserId() {
