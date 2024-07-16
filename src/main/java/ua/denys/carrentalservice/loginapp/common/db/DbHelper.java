@@ -1,22 +1,31 @@
 package ua.denys.carrentalservice.loginapp.common.db;
 
+import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.*;
+
+import java.sql.*;
 import ua.denys.carrentalservice.loginapp.session.model.Session;
 import ua.denys.carrentalservice.loginapp.session.service.SessionService;
 
-import java.sql.*;
-
-import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.*;
-
 public class DbHelper {
   private Connection con;
+  private static String url = null;
 
   private static DbHelper INSTANCE = null;
 
-  private DbHelper() {}
+  private DbHelper(String url) {
+    this.url = url;
+  }
+
+  public static DbHelper getInstance(String url) {
+    if (INSTANCE == null || url == null) {
+      INSTANCE = new DbHelper(url);
+    }
+    return INSTANCE;
+  }
 
   public static DbHelper getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new DbHelper();
+    if (INSTANCE == null || url == null) {
+      INSTANCE = new DbHelper(URL);
     }
     return INSTANCE;
   }
@@ -44,22 +53,22 @@ public class DbHelper {
 
   public boolean login(String username, String password) throws SQLException {
     var result = false;
+    result =
+        openConnection()
+            .executeQuery(
+                " SELECT "
+                    + UsersColumns.USERNAME
+                    + " FROM "
+                    + USERS_TABLE
+                    + " WHERE "
+                    + UsersColumns.USERNAME
+                    + " = '"
+                    + username
+                    + "' AND password = '"
+                    + password
+                    + "'")
+            .next();
     try {
-      result =
-          openConnection()
-              .executeQuery(
-                  " SELECT "
-                      + UsersColumns.USERNAME
-                      + " FROM "
-                      + USERS_TABLE
-                      + " WHERE "
-                      + UsersColumns.USERNAME
-                      + " = '"
-                      + username
-                      + "' AND password = '"
-                      + password
-                      + "'")
-              .next();
     } finally {
       closeConnection();
     }
@@ -67,20 +76,12 @@ public class DbHelper {
   }
 
   public void registerUser(String username, String password) throws SQLException {
+    var sql =
+        String.format(
+            "INSERT INTO %s(%s, %s) values('%s', '%s')",
+            USERS_TABLE, UsersColumns.USERNAME, UsersColumns.PASSWORD, username, password);
     try {
-      openConnection()
-          .execute(
-              "INSERT INTO "
-                  + USERS_TABLE
-                  + "("
-                  + UsersColumns.USERNAME
-                  + ","
-                  + UsersColumns.PASSWORD
-                  + ") values('"
-                  + username
-                  + "', '"
-                  + password
-                  + "')");
+      openConnection().execute(sql);
     } finally {
       closeConnection();
     }
@@ -319,10 +320,19 @@ public class DbHelper {
     }
   }
 
+  public ResultSet execute(String sql) throws SQLException {
+    try (var con = openConnection()) {
+      con.execute(sql);
+      return con.getResultSet();
+    } finally {
+      closeConnection();
+    }
+  }
+
   private Statement openConnection() {
     Statement statement = null;
     try {
-      con = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
+      con = DriverManager.getConnection(url, USER_NAME, PASSWORD);
       statement = con.createStatement();
     } catch (SQLException exception) {
       exception.printStackTrace();
