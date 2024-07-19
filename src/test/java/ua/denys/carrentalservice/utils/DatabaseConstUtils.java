@@ -6,7 +6,7 @@ public final class DatabaseConstUtils {
   public static final String JDBC_DRIVER_NAME = "org.h2.Driver";
   public static final String USER_NAME = "root";
   public static final String PASSWORD = "admin";
-  public static final String URL = "jdbc:h2:mem:carrental;INIT=runscript from 'src/create.sql';DB_CLOSE_DELAY=-1";
+  public static final String DB_URL = "jdbc:h2:mem:carrental;INIT=runscript from 'src/create.sql';DB_CLOSE_DELAY=-1";
 
   public static final String USERS_TABLE = "users";
   public static final String SESSION_TABLE = "session";

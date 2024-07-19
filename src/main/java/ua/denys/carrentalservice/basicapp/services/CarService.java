@@ -2,6 +2,8 @@ package ua.denys.carrentalservice.basicapp.services;
 
 import ua.denys.carrentalservice.basicapp.model.Car;
 import ua.denys.carrentalservice.loginapp.common.db.DbHelper;
+import ua.denys.carrentalservice.loginapp.common.db.car.repository.CarRepository;
+import ua.denys.carrentalservice.loginapp.common.db.session.repository.SessionRepository;
 import ua.denys.carrentalservice.loginapp.session.service.SessionService;
 
 import java.sql.ResultSet;
@@ -10,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.CarsColumns.*;
+import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.URL;
 
 public class CarService {
   private static CarService INSTANCE = null;
@@ -32,7 +35,7 @@ public class CarService {
       int power,
       String transmission)
       throws SQLException {
-    DbHelper.getInstance()
+    CarRepository.getInstance(URL)
         .addCar(
             brand,
             carSeats,
@@ -45,15 +48,14 @@ public class CarService {
             transmission);
   }
 
-  public List<Car> getByUserId() {
+  public List<Car> getCarListByUserId() {
     ResultSet rs = null;
     List<Car> cars = null;
     try {
       rs =
-          DbHelper.getInstance()
+          CarRepository.getInstance(URL)
               .getCarsByUserId(
-                  DbHelper.getInstance()
-                      .getIdBySessionKey(SessionService.getInstance().getSkByFile()));
+                  SessionRepository.getInstance(URL).getUserIdBySessionKey(SessionService.getInstance().getSkByFile()));
       while (rs.next()) {
         if (cars == null) cars = new ArrayList<>();
         cars.add(

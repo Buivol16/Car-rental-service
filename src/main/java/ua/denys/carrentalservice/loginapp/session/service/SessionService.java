@@ -1,6 +1,6 @@
 package ua.denys.carrentalservice.loginapp.session.service;
 
-import ua.denys.carrentalservice.loginapp.common.db.DbHelper;
+import ua.denys.carrentalservice.loginapp.common.db.session.repository.SessionRepository;
 import ua.denys.carrentalservice.loginapp.session.model.Session;
 
 import java.io.File;
@@ -13,9 +13,11 @@ import java.util.Scanner;
 
 import static ua.denys.carrentalservice.loginapp.utils.ConstUtils.PATH_TO_KEY;
 import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.SessionColumnConsts.dtf;
+import static ua.denys.carrentalservice.loginapp.utils.DatabaseConstUtils.URL;
 
 public class SessionService {
   private static SessionService INSTANCE = null;
+  private static final SessionRepository repository = SessionRepository.getInstance(URL);
 
   private SessionService() {}
 
@@ -24,19 +26,19 @@ public class SessionService {
     return INSTANCE;
   }
 
-  public void create(String username) throws SQLException {
-    Session session = new Session(DbHelper.getInstance().getIdByUsername(username));
+  public void create(Long userId) throws SQLException {
+    Session session = new Session(userId);
     try {
       createFileSessionKey(session);
     } catch (IOException e) {
       e.printStackTrace();
     }
-    DbHelper.getInstance().registerSession(session);
+    repository.registerSession(session);
   }
 
   public void delete() {
     try {
-      DbHelper.getInstance().deleteSession(getSkByFile());
+      repository.deleteSession(getSkByFile());
       deleteFileSessionKey();
     } catch (SQLException exception) {
       exception.printStackTrace();
@@ -60,7 +62,7 @@ public class SessionService {
   public boolean isExpired() {
     boolean result = false;
     try {
-      String dateFromBase = DbHelper.getInstance().getSessionExpired_at(getSkByFile());
+      String dateFromBase = repository.getSessionExpired_at(getSkByFile());
       String dateNow = LocalDateTime.now().format(dtf);
       if (dateFromBase.compareTo(dateNow) > 0) {
         result = false;
@@ -80,8 +82,8 @@ public class SessionService {
     System.out.println("File with session key is created.");
   }
 
-  private void deleteFileSessionKey(){
-    if (new File(PATH_TO_KEY).delete()){
+  private void deleteFileSessionKey() {
+    if (new File(PATH_TO_KEY).delete()) {
       System.out.println("The key.sk is successfully deleted.");
     }
   }

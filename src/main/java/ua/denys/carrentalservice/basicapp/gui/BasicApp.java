@@ -123,7 +123,7 @@ public class BasicApp extends JFrame {
 
   private void getCarsList() {
     var carServiceInstance = CarService.getInstance();
-    var cars = carServiceInstance.getByUserId();
+    var cars = carServiceInstance.getCarListByUserId();
     var dfl = new DefaultListModel<>();
     for (var car : cars) {
       var selectedCar = car.getCar();
